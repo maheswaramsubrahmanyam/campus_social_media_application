@@ -17,7 +17,8 @@ class Constants {
   static Color darkBG = Color(0xff2B2B2B);
 
   static ThemeData lightTheme = ThemeData(
-    backgroundColor: lightBG,
+    useMaterial3: false,
+    fontFamily: 'General Sans',
     primaryColor: lightPrimary,
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: lightAccent,
@@ -42,12 +43,15 @@ class Constants {
         fontWeight: FontWeight.w700,
       ),
     ),
-    colorScheme: ColorScheme.fromSwatch().copyWith(
-      secondary: lightAccent,
-    ),
+    colorScheme: ColorScheme.fromSwatch()
+        .copyWith(
+          secondary: lightAccent,
+        )
+        .copyWith(background: lightBG),
   );
 
   static ThemeData darkTheme = ThemeData(
+    useMaterial3: false,
     iconTheme: const IconThemeData(color: Colors.white),
     colorScheme: ColorScheme.fromSwatch(
       accentColor: darkAccent,

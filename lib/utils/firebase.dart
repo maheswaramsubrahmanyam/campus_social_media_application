@@ -8,6 +8,7 @@ FirebaseFirestore firestore = FirebaseFirestore.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
 final Uuid uuid = Uuid();
 
+
 // Collection refs
 CollectionReference usersRef = firestore.collection('users');
 CollectionReference chatRef = firestore.collection("chats");
@@ -21,6 +22,10 @@ CollectionReference likesRef = firestore.collection('likes');
 CollectionReference favUsersRef = firestore.collection('favoriteUsers');
 CollectionReference chatIdRef = firestore.collection('chatIds');
 CollectionReference statusRef = firestore.collection('status');
+CollectionReference musicRef = firestore.collection('music');
+CollectionReference reelsRef = firestore.collection('reels');
+
+
 
 // Storage refs
 Reference profilePic = storage.ref().child('profilePic');

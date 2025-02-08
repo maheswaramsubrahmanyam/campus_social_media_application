@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:social_media_app/models/post.dart';
 import 'package:social_media_app/screens/mainscreen.dart';
+import 'package:social_media_app/services/pagination_service.dart';
 import 'package:social_media_app/services/post_service.dart';
 import 'package:social_media_app/services/user_service.dart';
 import 'package:social_media_app/utils/constants.dart';
@@ -22,14 +25,23 @@ class PostsViewModel extends ChangeNotifier {
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  //Variables
+  //booleans
+  bool edit = false;
   bool loading = false;
+  bool loadingMore = false;
+  bool loadMore = true;
+
+  //firestore
+  final FirestorePagination _pagination = FirestorePagination(30);
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  //list
+  List<DocumentSnapshot> data = [];
+
+  //strings
   String? username;
-  File? mediaUrl;
-  final picker = ImagePicker();
   String? location;
-  Position? position;
-  Placemark? placemark;
+  String? selectedSong;
   String? bio;
   String? description;
   String? email;
@@ -37,10 +49,21 @@ class PostsViewModel extends ChangeNotifier {
   String? ownerId;
   String? userId;
   String? type;
-  File? userDp;
   String? imgLink;
-  bool edit = false;
   String? id;
+
+  //locators
+  Placemark? placemark;
+  Position? position;
+
+  //files
+  File? mediaUrl;
+  File? userDp;
+  File? video;
+
+  //initializers
+  final picker = ImagePicker();
+  final player = AudioPlayer();
 
   //controllers
   TextEditingController locationTEC = TextEditingController();
@@ -48,6 +71,11 @@ class PostsViewModel extends ChangeNotifier {
   //Setters
   setEdit(bool val) {
     edit = val;
+    notifyListeners();
+  }
+
+  setSong(String val) {
+    selectedSong = val;
     notifyListeners();
   }
 
@@ -94,7 +122,7 @@ class PostsViewModel extends ChangeNotifier {
     loading = true;
     notifyListeners();
     try {
-      PickedFile? pickedFile = await picker.getImage(
+      XFile? pickedFile = await picker.pickImage(
         source: camera ? ImageSource.camera : ImageSource.gallery,
       );
       CroppedFile? croppedFile = await ImageCropper().cropImage(
@@ -129,6 +157,23 @@ class PostsViewModel extends ChangeNotifier {
     }
   }
 
+  //pick a video from gallery
+  pickVideo({bool camera = false, required context}) async {
+    loading = true;
+    notifyListeners();
+    try {
+      XFile? pickedFile = await picker.pickVideo(
+        source: camera ? ImageSource.camera : ImageSource.gallery,
+      );
+      video = File(pickedFile!.path);
+      loading = false;
+      notifyListeners();
+    } catch (e) {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
   getLocation() async {
     loading = true;
     notifyListeners();
@@ -153,11 +198,25 @@ class PostsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  //get reels
+  getReels() async {
+    try {
+      Query<Map<String, dynamic>> query =
+          _firestore.collection('reels').orderBy('timestamp', descending: true);
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await query.get();
+      data.addAll(querySnapshot.docs);
+    } catch (e) {
+      print('>>>>> $e');
+    }
+  }
+
   uploadPosts(BuildContext context) async {
     try {
       loading = true;
       notifyListeners();
-      await postService.uploadPost(mediaUrl!, location!, description!);
+      await postService.uploadPost(
+          mediaUrl!, location ?? "", description ?? "");
       loading = false;
       resetPost();
       notifyListeners();
@@ -165,7 +224,28 @@ class PostsViewModel extends ChangeNotifier {
       print(e);
       loading = false;
       resetPost();
-      showInSnackBar('Uploaded successfully!', context);
+      showInSnackBar('Error Uploading!', context);
+      notifyListeners();
+    }
+  }
+
+  uploadReel(BuildContext context) async {
+    try {
+      loading = true;
+      notifyListeners();
+      await postService.uploadReel(
+        video!,
+        selectedSong ?? "",
+        description ?? "",
+      );
+      loading = false;
+      resetPost();
+      notifyListeners();
+    } catch (e) {
+      print(e);
+      loading = false;
+      resetPost();
+      showInSnackBar('An error occured!', context);
       notifyListeners();
     }
   }

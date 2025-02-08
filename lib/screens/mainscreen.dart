@@ -1,9 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:social_media_app/components/fab_container.dart';
-import 'package:social_media_app/pages/notification.dart';
+import 'package:social_media_app/pages/reels.dart';
+import 'package:social_media_app/screens/notification.dart';
 import 'package:social_media_app/pages/profile.dart';
 import 'package:social_media_app/pages/search.dart';
 import 'package:social_media_app/pages/feeds.dart';
@@ -20,13 +22,13 @@ class _TabScreenState extends State<TabScreen> {
   List pages = [
     {
       'title': 'Home',
-      'icon': Ionicons.home,
+      'icon': Iconsax.home,
       'page': Feeds(),
       'index': 0,
     },
     {
       'title': 'Search',
-      'icon': Ionicons.search,
+      'icon': Iconsax.search_normal,
       'page': Search(),
       'index': 1,
     },
@@ -37,14 +39,14 @@ class _TabScreenState extends State<TabScreen> {
       'index': 2,
     },
     {
-      'title': 'Notification',
-      'icon': CupertinoIcons.bell_solid,
-      'page': Activities(),
+      'title': 'Reels',
+      'icon': Iconsax.video_square,
+      'page': WoobleReels(),
       'index': 3,
     },
     {
       'title': 'Profile',
-      'icon': CupertinoIcons.person_fill,
+      'icon': Iconsax.user,
       'page': Profile(profileId: firebaseAuth.currentUser!.uid),
       'index': 4,
     },
